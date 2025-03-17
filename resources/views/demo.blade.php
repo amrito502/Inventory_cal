@@ -25,7 +25,6 @@
                     <th>Total Amount</th>
                     <th>Discount (%)</th>
                     <th>Grand Total</th>
-                    <th>Action</th>
                 </tr>
             </thead>
             <tbody>
@@ -38,44 +37,21 @@
                     <td><input type="text" class="form-control total_amount" value="0"></td>
                     <td><input type="text" class="form-control discount" value="0.00"></td>
                     <td><input type="text" class="form-control grand_total" value="0.00"></td>
-                    <td><input type="hidden" class="product_id" value="">
-                    <td><button class="btn btn-danger remove-row">Remove</button></td>
+                    <td><input type="hidden" class="product_id" value=""> 
                 </tr>
             </tbody>
         </table>
-        <button id="addRow" class="btn btn-success">Add Row</button>
         <button id="saveInventory" class="btn btn-primary">Save Inventory</button>
     </div>
 
+
+
     <script>
         $(document).ready(function() {
-            // Function to add a new row
-            $("#addRow").on("click", function() {
-                let newRow = `<tr>
-                    <td><input type="text" class="form-control sku" placeholder="sku"></td>
-                    <td><input type="text" class="form-control product_name" placeholder="name"></td>
-                    <td><input type="text" class="form-control quantity" value="1"></td>
-                    <td><input type="text" class="form-control cost_price" value="1"></td>
-                    <td><input type="text" class="form-control additional_cost" value="0.00"></td>
-                    <td><input type="text" class="form-control total_amount" value="0"></td>
-                    <td><input type="text" class="form-control discount" value="0.00"></td>
-                    <td><input type="text" class="form-control grand_total" value="0.00"></td>
-                    <td><input type="hidden" class="product_id" value="">
-                    <td><button class="btn btn-danger remove-row">Remove</button></td>
-                </tr>`;
-                $("tbody").append(newRow);
-            });
-
-            // Function to remove a row
-            $(document).on("click", ".remove-row", function() {
-                $(this).closest("tr").remove();
-            });
-
-            // Event delegation for dynamically added SKU input fields
-            $(document).on('keyup', '.sku', function() {
+            $('.sku').on('keyup', function() {
                 let sku = $(this).val();
                 let row = $(this).closest('tr');
-
+    
                 if (sku) {
                     $.ajax({
                         url: '/get-product-by-sku',
@@ -109,33 +85,32 @@
                     row.find('.product_id').val('');
                 }
             });
-
-            // Event delegation for dynamically added input fields
-            $(document).on('input', '.quantity, .cost_price, .additional_cost, .discount', function() {
+    
+            $('.quantity, .cost_price, .additional_cost, .discount').on('input', function() {
                 let row = $(this).closest('tr');
                 calculateRow(row);
             });
-
+    
             function calculateRow(row) {
                 let quantity = parseFloat(row.find('.quantity').val()) || 0;
                 let cost_price = parseFloat(row.find('.cost_price').val()) || 0;
                 let additional_cost = parseFloat(row.find('.additional_cost').val()) || 0;
                 let discount = parseFloat(row.find('.discount').val()) || 0;
-
+    
                 let totalAmount = (quantity * cost_price) + additional_cost;
                 let discountAmount = (totalAmount * discount) / 100;
                 let grandTotal = totalAmount - discountAmount;
-
+    
                 row.find('.total_amount').val(totalAmount.toFixed(2));
                 row.find('.grand_total').val(grandTotal.toFixed(2));
             }
 
             $("#saveInventory").on("click", function() {
                 let data = [];
-
+    
                 $("tbody tr").each(function() {
                     let row = $(this);
-
+    
                     let rowData = {
                         product_id: row.find(".product_id").val(),
                         sku: row.find(".sku").val(),
@@ -147,10 +122,10 @@
                         discount: row.find(".discount").val(),
                         grand_total: row.find(".grand_total").val(),
                     };
-
+    
                     data.push(rowData);
                 });
-
+  
                 $.ajax({
                     url: "/inventories",
                     type: "POST",
@@ -169,6 +144,7 @@
             });
         });
     </script>
+    
 </body>
 
 </html>
